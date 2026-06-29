@@ -111,6 +111,11 @@ async def gatekeeper_node_func(ctx: Context, node_input: Any) -> AsyncGenerator[
                 "fraud_reasons": [doc_status["error"]],
                 "audit_trail": audit_trail,
                 "name": payload.get("name", ""),
+                "composite_score": 0.0,
+                "credit_score_component": 0.0,
+                "dti_component": 0.0,
+                "cash_flow_component": 0.0,
+                "stability_modifier": 1.0,
                 **redacted
             }
         )
@@ -159,6 +164,11 @@ async def gatekeeper_node_func(ctx: Context, node_input: Any) -> AsyncGenerator[
                     "fraud_reasons": ["Missing required documents"],
                     "audit_trail": audit_trail,
                     "name": payload.get("name", ""),
+                    "composite_score": 0.0,
+                    "credit_score_component": 0.0,
+                    "dti_component": 0.0,
+                    "cash_flow_component": 0.0,
+                    "stability_modifier": 1.0,
                     **redacted
                 }
             )
