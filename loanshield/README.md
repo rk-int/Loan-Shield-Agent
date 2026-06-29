@@ -98,3 +98,42 @@ The LoanShield scoring engine generates risk scores ($0 - 100$) and routes decis
 *   **Auto-Approve** (Score $\ge 70$, zero fraud flags): Applications are approved instantly.
 *   **Human Review** (Score $40 - 69$, zero fraud flags): Suspends workflow with a HITL interrupt, requesting underwriter verification.
 *   **Auto-Reject** (Score $< 40$ OR any fraud flag): Rejects application and drafts a regulatory ECOA-compliant adverse action letter.
+
+---
+
+## 🖥️ Custom Web Application Portal
+
+We built a custom, high-fidelity web gateway interface for LoanShield, replacing the generic command-line or basic forms with a state-of-the-art underwriting workstation:
+1.  **3D WebGL Backdrop**: Utilizes **Three.js** to render a real-time, dot-matrix animated particle field that responds dynamically to pointer coordinates via parallax drift and features a slow breathing pulse.
+2.  **Translucent Glassmorphism Panels**: Built with a sleek dark aesthetic (`#0A0A0A`) accented by neon green (`#A3E635`), utilizing glass panels with `backdrop-filter: blur(12px)`.
+3.  **Live Node Graph Workflow**: Displays the exact LangGraph agent node layout connected by active, pulsing SVG bezier connection paths that light up in real-time.
+4.  **EventSource (SSE) Streaming**: Connects directly to the backend memory runner to stream node state transitions (`running`, `paused`, `completed`, `failed`) and transition logs.
+5.  **Audit Trail Terminal Logs**: Simulates a CLI logs terminal directly on the page, with info/warning/critical color-coding.
+6.  **Interactive Underwriter Overrides Box**: Pauses execution and pops up override control buttons (`APPROVE`, `REJECT`, `RESUME`) when human intervention is triggered.
+
+---
+
+## 📸 Web UI Execution Screenshots
+
+### 1. Loan Shield Human in loop Approval
+![Human in Loop Approval Escalation](docs/images/hitl_approval_pending.png)
+*This screenshot illustrates the workflow paused at `human_underwriter_hitl_node` (pulsing orange). Because the risk score of 64.1 lies within the review threshold, the process suspends and displays interactive **APPROVE LOAN** and **REJECT LOAN** override buttons in the bottom-right panel.*
+
+---
+
+### 2. Loan Shield Rejected
+![Synthetic Fraud Rejection](docs/images/application_rejected.png)
+*This screenshot demonstrates the auto-rejection state for applicant Grace Carter. A synthetic fraud identity mismatch is flagged, resulting in a risk score of 80.8 being overridden to a **REJECTED** verdict. The formal ECOA Credit Notice letter details the specific adverse action reasons at the bottom.*
+
+---
+
+### 3. Loan Shield Auto Approved
+![Prime Auto Approval](docs/images/auto_approved.png)
+*This screenshot shows a prime credit application (Liam Smith) being successfully processed. The risk scorer evaluates the profile at a composite score of 85.4, resulting in a final verdict of **APPROVED** (green badge) and drafting the congratulations approval notice.*
+
+---
+
+### 4. Loan Shield Human in Loop Approved
+![HITL Overridden Approval](docs/images/hitl_approved.png)
+*This screenshot showcases the application state after the human underwriter clicks the **APPROVE LOAN** override button for Harper Robinson. The workflow resumes from its paused state, evaluates the final decision as **APPROVED**, and displays the completed audit trail logs.*
+
