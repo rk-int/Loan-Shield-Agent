@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  loanshield-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loanshield-service
+    ports:
+      - "8080:8080"
+    environment:
+      - GEMINI_MODEL=gemini-2.5-flash
+      - GOOGLE_GENAI_USE_VERTEXAI=False
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./datasets:/app/datasets
+    restart: unless-stopped

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoanShield — Secure Automated Underwriting Platform</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- WebGL Particle Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <h1 class="logo-title">LOAN<span>SHIELD</span></h1>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator online"></span>
+                <span class="status-text">DECIZION ENGINE LOCAL GATEWAY</span>
+            </div>
+        </header>
+
+        <!-- Benchmark Selector -->
+        <section class="benchmark-section">
+            <h2 class="section-title"><i class="fa-solid fa-list-check"></i> Select Benchmark Template</h2>
+            <div class="benchmark-grid" id="benchmark-grid">
+                <!-- Injected via JS -->
+                <div class="benchmark-card loading">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Loading test profiles...
+                </div>
+            </div>
+        </section>
+
+        <!-- Middle Flex Body -->
+        <main class="main-content">
+            
+            <!-- Left Side: Form Controls -->
+            <section class="form-section glassy-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-file-invoice-dollar"></i> Loan Application Form</h2>
+                <form id="application-form" class="app-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Applicant Name</label>
+                            <input type="text" id="name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ssn">Social Security Number (SSN)</label>
+                            <input type="text" id="ssn" placeholder="000-00-0000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="text" id="dob" placeholder="MM-DD-YYYY" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Phone Suffix (or full)</label>
+                            <input type="text" id="phone_number" placeholder="-1234" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="home_address">Home Address</label>
+                        <input type="text" id="home_address" placeholder="123 Pine St, San Francisco, CA" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" min="18" max="120" placeholder="30" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="declared_income_monthly">Declared Monthly Income ($)</label>
+                            <input type="number" id="declared_income_monthly" placeholder="5000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="loan_amount">Requested Loan Amount ($)</label>
+                            <input type="number" id="loan_amount" placeholder="25000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="purpose">Loan Purpose</label>
+                            <select id="purpose">
+                                <option value="Debt Consolidation">Debt Consolidation</option>
+                                <option value="Home Improvement">Home Improvement</option>
+                                <option value="Used Car Loan">Used Car Loan</option>
+                                <option value="Major Purchase">Major Purchase</option>
+                                <option value="Emergency Expenses">Emergency Expenses</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="applicant_id" value="APP-NEW">
+                    <input type="hidden" id="customer_id" value="CU-NEW">
+                    <input type="hidden" id="target_scenario" value="Custom">
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-clear" class="btn btn-secondary">
+                            <i class="fa-solid fa-rotate-left"></i> Clear
+                        </button>
+                        <button type="submit" id="btn-submit" class="btn btn-primary">
+                            <i class="fa-solid fa-paper-plane"></i> Verify Loan Approval Status
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Side: Workflow Visualizer -->
+            <section class="visualizer-section glassy-panel">
+                <h2 class="panel-title"><i class="fa-solid fa-network-wired"></i> Live Node Graph Workflow</h2>
+                <div class="graph-viewport">
+                    <!-- SVG Connection Lines -->
+                    <svg class="graph-connections" width="100%" height="100%">
+                        <defs>
+                            <linearGradient id="neon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#A3E635" stop-opacity="0.2"/>
+                                <stop offset="50%" stop-color="#A3E635" stop-opacity="1"/>
+                                <stop offset="100%" stop-color="#BEF264" stop-opacity="0.2"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Connections paths (coordinates are updated on load/resize) -->
+                        <path id="path-start-gate" d="" class="connection-line" />
+                        <path id="path-gate-fin" d="" class="connection-line" />
+                        <path id="path-gate-fraud" d="" class="connection-line" />
+                        <path id="path-fin-join" d="" class="connection-line" />
+                        <path id="path-fraud-join" d="" class="connection-line" />
+                        <path id="path-join-score" d="" class="connection-line" />
+                        <path id="path-score-hitl" d="" class="connection-line" />
+                        <path id="path-score-exp" d="" class="connection-line" />
+                        <path id="path-hitl-exp" d="" class="connection-line" />
+                        <path id="path-exp-notif" d="" class="connection-line" />
+                    </svg>
+
+                    <!-- Graph Nodes -->
+                    <div id="node-start" class="graph-node node-start">
+                        <div class="node-icon"><i class="fa-solid fa-play"></i></div>
+                        <div class="node-label">START</div>
+                    </div>
+
+                    <div id="node-gatekeeper" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-user-shield"></i></div>
+                        <div class="node-label">gatekeeper_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-financial" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+                        <div class="node-label">financial_analysis_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-fraud" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-mask"></i></div>
+                        <div class="node-label">fraud_analysis_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-join" class="graph-node node-small">
+                        <div class="node-icon"><i class="fa-solid fa-code-merge"></i></div>
+                        <div class="node-label">merge_analysis</div>
+                    </div>
+
+                    <div id="node-scorer" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-calculator"></i></div>
+                        <div class="node-label">risk_scoring_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-hitl" class="graph-node node-alert">
+                        <div class="node-icon"><i class="fa-solid fa-user-tie"></i></div>
+                        <div class="node-label">human_underwriter_hitl_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-explanation" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                        <div class="node-label">explanation_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+
+                    <div id="node-notifier" class="graph-node">
+                        <div class="node-icon"><i class="fa-solid fa-bell"></i></div>
+                        <div class="node-label">notifier_node</div>
+                        <div class="node-status">Idle</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Layout: Metrics, HITL Override Controls & Logs -->
+        <section class="results-and-logs">
+            
+            <!-- Left panel: Audit Terminal logs -->
+            <div class="terminal-panel glassy-panel flex-2">
+                <h3 class="panel-subtitle"><i class="fa-solid fa-terminal"></i> Audit Trail Terminal Logs</h3>
+                <div class="terminal-body" id="terminal-body">
+                    <div class="log-line info">[System] Ready to run loan risk evaluation workflows.</div>
+                </div>
+            </div>
+
+            <!-- Middle panel: Decision metrics -->
+            <div class="metrics-panel glassy-panel flex-1" id="metrics-panel">
+                <h3 class="panel-subtitle"><i class="fa-solid fa-chart-pie"></i> Risk Evaluation Metrics</h3>
+                
+                <div class="metrics-content">
+                    <!-- Gauge Score -->
+                    <div class="score-circle-container">
+                        <div class="score-ring">
+                            <span id="metric-score">-</span>
+                            <span class="score-label">COMPOSITE RISK</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Verdict Badge -->
+                    <div class="verdict-container">
+                        <span class="verdict-title">Final Verdict</span>
+                        <div id="verdict-badge" class="verdict-badge neutral">PENDING</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right panel: Document & Underwriter HITL Actions -->
+            <div class="hitl-panel glassy-panel flex-1" id="hitl-panel">
+                <h3 class="panel-subtitle"><i class="fa-solid fa-user-check"></i> Underwriter Overrides</h3>
+                <div class="hitl-controls-body" id="hitl-controls-body">
+                    <div class="hitl-empty-state">
+                        <i class="fa-solid fa-hourglass-empty"></i>
+                        <p>No active escalation interrupts. Workflow running normally.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Regulatory ECOA adverse Action Notice -->
+        <section class="ecoa-section glassy-panel" id="ecoa-section" style="display:none;">
+            <h2 class="panel-title"><i class="fa-solid fa-stamp"></i> Formal ECOA Regulatory Credit Notice</h2>
+            <div class="ecoa-letter-content" id="ecoa-letter-content">
+                <!-- Rendered output -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Main JS Application Code -->
+    <script src="script.js"></script>
+</body>
+</html>
