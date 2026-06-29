@@ -1,8 +1,7 @@
 # Lightweight Runtime Requirements for Vercel Deployment
-# (Excludes heavy machine learning packages like google-cloud-aiplatform, pandas, numpy, scipy)
+# (Letting google-adk automatically resolve the matching google-genai version)
 google-adk>=2.0.0,<3.0.0
-google-genai>=0.1.0,<1.0.0
-opentelemetry-instrumentation-google-genai>=0.1.0,<1.0.0
+opentelemetry-instrumentation-google-genai>=0.1.0
 mcp>=1.0.0,<2.0.0
 gcsfs>=2024.11.0
 fastapi>=0.110.0
