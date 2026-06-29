@@ -31,6 +31,36 @@ The LoanShield processing pipeline is structured as a LangGraph state workflow:
 
 ---
 
+## 🤝 Multi-Agent Core Framework
+
+LoanShield implements a structured multi-agent cooperation architecture using Google ADK to distribute responsibility across highly specialized agents:
+
+1. **Orchestrator Agent (LangGraph Coordinator)**
+   * **Role**: Governs the application lifecycle and execution state.
+   * **Responsibilities**: Sequences intake triggers, coordinates parallel branch fan-out/fan-in processing (Financial + Fraud agents), resolves conditional routes, and manages HITL wait interrupts for underwriters.
+
+2. **Gatekeeper Agent**
+   * **Role**: Data intake, security sanitization, and document validation.
+   * **Responsibilities**: Executes `pii_redactor_skill` to sanitize raw SSN, DOB, phone, and address into anonymized tokens. Queries the `document_storage_mcp_final.json` database. Pauses execution with an interrupt if documentation status is `INCOMPLETE`.
+
+3. **Financial Analyst Agent**
+   * **Role**: Financial profile check, verification of stated parameters, and affordability math.
+   * **Responsibilities**: Invokes standard MCP server tools to query bank deposit lists, credit bureau indicators, and employment profiles. Executes the `income_verify_skill` to detect monthly deposit variances (flags >100% variance as fraud). Executes the `dti_calculator_skill` to score total monthly DTI debt obligations.
+
+4. **Fraud & Compliance Agent**
+   * **Role**: Anti-fraud filters and circuit breakers.
+   * **Responsibilities**: Enforces strict operational guardrails based on credit history and age limits:
+     * *Synthetic Fraud Rule*: Catches anomalies where credit age < 6 months but credit score > 780.
+     * *Immaturity/High-exposure Rule*: Flags applicants under 21 requesting > $100,000.
+     * *Employment Stable Income Check*: Screens for employment status = `Terminated`.
+     * Instantly sets `fraud_flag = True` to bypass score calculations and trigger immediate rejection.
+
+5. **Explanations Agent (Compliance Officer)**
+   * **Role**: Regulatory adverse action notice compiler.
+   * **Responsibilities**: Evaluates final node outcomes and builds credit decision notification letters using the `explanation_skill` LLM agent, aligning declines with Section 701(a) of the Equal Credit Opportunity Act (ECOA) (e.g. low FICO score, high DTI, fraud triggers) and masking all PII.
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -115,25 +145,31 @@ We built a custom, high-fidelity web gateway interface for LoanShield, replacing
 
 ## 📸 Web UI Execution Screenshots
 
-### 1. Loan Shield Human in loop Approval
+### 1. Loan Shield Enter Gemini API Key (Security & Configuration)
+![Enter Gemini API Key prompt](docs/images/api_key_prompt.png)
+*When accessing the portal for the first time, users are presented with this sleek dark glassmorphism modal to enter their **Gemini API Key** before proceeding. This key is stored securely in the browser's `localStorage` and sent dynamically for underwriting operations, removing any dependency on server-side secrets when hosted in cloud environments like Vercel.*
+
+---
+
+### 2. Loan Shield Human in loop Approval
 ![Human in Loop Approval Escalation](docs/images/hitl_approval_pending.png)
 *This screenshot illustrates the workflow paused at `human_underwriter_hitl_node` (pulsing orange). Because the risk score of 64.1 lies within the review threshold, the process suspends and displays interactive **APPROVE LOAN** and **REJECT LOAN** override buttons in the bottom-right panel.*
 
 ---
 
-### 2. Loan Shield Rejected
+### 3. Loan Shield Rejected
 ![Synthetic Fraud Rejection](docs/images/application_rejected.png)
 *This screenshot demonstrates the auto-rejection state for applicant Grace Carter. A synthetic fraud identity mismatch is flagged, resulting in a risk score of 80.8 being overridden to a **REJECTED** verdict. The formal ECOA Credit Notice letter details the specific adverse action reasons at the bottom.*
 
 ---
 
-### 3. Loan Shield Auto Approved
+### 4. Loan Shield Auto Approved
 ![Prime Auto Approval](docs/images/auto_approved.png)
 *This screenshot shows a prime credit application (Liam Smith) being successfully processed. The risk scorer evaluates the profile at a composite score of 85.4, resulting in a final verdict of **APPROVED** (green badge) and drafting the congratulations approval notice.*
 
 ---
 
-### 4. Loan Shield Human in Loop Approved
+### 5. Loan Shield Human in Loop Approved
 ![HITL Overridden Approval](docs/images/hitl_approved.png)
 *This screenshot showcases the application state after the human underwriter clicks the **APPROVE LOAN** override button for Harper Robinson. The workflow resumes from its paused state, evaluates the final decision as **APPROVED**, and displays the completed audit trail logs.*
 
