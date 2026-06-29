@@ -495,6 +495,16 @@ async function handleFormSubmit(e) {
         target_scenario: document.getElementById('target_scenario').value || "Custom"
     };
 
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+        document.getElementById('apiKeyModal').style.display = 'flex';
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Verify Loan Approval Status`;
+        logToTerminal(`[System] Dispatch aborted: Gemini API Key is missing.`, 'warn');
+        return;
+    }
+    payload.gemini_api_key = apiKey;
+
     logToTerminal(`[System] Dispatching request for ${payload.name} (Amount: $${payload.loan_amount.toLocaleString()})`);
 
     try {
@@ -637,4 +647,31 @@ window.addEventListener('DOMContentLoaded', () => {
     // Event bindings
     document.getElementById('application-form').addEventListener('submit', handleFormSubmit);
     document.getElementById('btn-clear').addEventListener('click', clearForm);
+
+    // API Key modal bindings
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const modalApiKeyInput = document.getElementById('modalApiKeyInput');
+    const btnSaveKey = document.getElementById('btnSaveKey');
+    const btnChangeKey = document.getElementById('btnChangeKey');
+
+    // Prompt for key on first load if missing
+    if (!localStorage.getItem('gemini_api_key')) {
+        apiKeyModal.style.display = 'flex';
+    }
+
+    btnSaveKey.addEventListener('click', () => {
+        const key = modalApiKeyInput.value.trim();
+        if (key) {
+            localStorage.setItem('gemini_api_key', key);
+            apiKeyModal.style.display = 'none';
+            logToTerminal(`[System] Gemini API Key saved locally. Ready to proceed.`);
+        } else {
+            alert('Please enter a valid Gemini API Key.');
+        }
+    });
+
+    btnChangeKey.addEventListener('click', () => {
+        modalApiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+        apiKeyModal.style.display = 'flex';
+    });
 });

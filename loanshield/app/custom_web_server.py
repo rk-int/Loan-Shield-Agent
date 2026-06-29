@@ -42,10 +42,14 @@ async def create_session(payload: Dict[str, Any]):
     # Create the runner instance for this session
     runner = InMemoryRunner(app=loanshield_app)
     
+    # Pop and store API key in the session info (not payload)
+    api_key = payload.pop("gemini_api_key", None)
+    
     # Store session details
     sessions_store[session_id] = {
         "payload": payload,
         "runner": runner,
+        "gemini_api_key": api_key,
         "adk_session_id": None,
         "active_interrupt_id": None,
         "state": {}
@@ -61,6 +65,12 @@ async def run_workflow(session_id: str):
     runner = session_info["runner"]
     payload = session_info["payload"]
     
+    # Dynamically inject the user-provided API key into the environment
+    api_key = session_info.get("gemini_api_key")
+    if api_key:
+        os.environ["GEMINI_API_KEY"] = api_key
+        os.environ["GOOGLE_API_KEY"] = api_key
+        
     # Create ADK runner session
     adk_session = await runner.session_service.create_session(
         app_name="app", user_id="test_user"
@@ -122,6 +132,12 @@ async def resume_workflow(session_id: str, action: str):
     runner = session_info["runner"]
     adk_session_id = session_info["adk_session_id"]
     
+    # Dynamically inject the user-provided API key into the environment
+    api_key = session_info.get("gemini_api_key")
+    if api_key:
+        os.environ["GEMINI_API_KEY"] = api_key
+        os.environ["GOOGLE_API_KEY"] = api_key
+        
     if not adk_session_id:
         raise HTTPException(status_code=400, detail="Workflow has not been started yet")
         
